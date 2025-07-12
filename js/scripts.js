@@ -789,6 +789,23 @@ if (document.getElementById('recentes-grid')) {
     document.addEventListener('DOMContentLoaded', atualizarGridRecentes);
 }
 
+// Adicionar usuário mockado ao carregar a página de login
+if (window.location.pathname.includes('login.html')) {
+    const dbUsuarios = new PouchDB('usuarios');
+    const usuarioMock = {
+        _id: 'iskailer@neteflix.com',
+        nome: 'Iskailer',
+        email: 'iskailer@neteflix.com',
+        senha: 'iskailer',
+        tipo: 'cliente'
+    };
+    dbUsuarios.get(usuarioMock._id).catch(function (err) {
+        if (err.status === 404) {
+            dbUsuarios.put(usuarioMock);
+        }
+    });
+}
+
 // Adicionar eventos quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar se estamos na página de login
