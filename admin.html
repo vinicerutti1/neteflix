@@ -8,6 +8,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .navbar {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        .nav-tabs .nav-link.active {
+            color: #000 !important;
+            background: #fff !important;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+        .nav-tabs .nav-link {
+            color: #555;
+        }
+        .required-star { color: #e50914; margin-left: 2px; }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -46,11 +61,11 @@
                                 <form id="formFilme">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="titulo" class="form-label">Título do Filme</label>
-                                            <input type="text" class="form-control" id="titulo" required>
+                                            <label for="titulo" class="form-label">Título do Filme <span class="required-star">*</span></label>
+                                            <input type="text" class="form-control" id="titulo" required placeholder="Ex: John Wick - De Volta ao Jogo">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="categoria" class="form-label">Categoria</label>
+                                            <label for="categoria" class="form-label">Categoria <span class="required-star">*</span></label>
                                             <select class="form-select" id="categoria" required>
                                                 <option value="">Selecione...</option>
                                                 <option value="acao">Ação</option>
@@ -63,19 +78,19 @@
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="sinopse" class="form-label">Sinopse</label>
-                                        <textarea class="form-control" id="sinopse" rows="3" maxlength="350" required oninput="atualizarContadorSinopse()"></textarea>
+                                        <label for="sinopse" class="form-label">Sinopse <span class="required-star">*</span></label>
+                                        <textarea class="form-control" id="sinopse" rows="3" maxlength="350" required oninput="atualizarContadorSinopse()" placeholder="Ex: Um ex-assassino de aluguel busca vingança..."></textarea>
                                         <div class="text-end small"><span id="contador-sinopse">0</span>/350 caracteres</div>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="trailer" class="form-label">URL do Trailer</label>
-                                        <input type="url" class="form-control" id="trailer" placeholder="https://www.youtube.com/watch?v=..." required>
+                                        <label for="trailer" class="form-label">URL do Trailer <span class="required-star">*</span></label>
+                                        <input type="url" class="form-control" id="trailer" required placeholder="Ex: https://www.youtube.com/watch?v=abc123">
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="imagem" class="form-label">URL da Imagem</label>
-                                        <input type="url" class="form-control" id="imagem" placeholder="https://exemplo.com/imagem.jpg" required>
+                                        <label for="imagem" class="form-label">URL da Imagem <span class="required-star">*</span></label>
+                                        <input type="url" class="form-control" id="imagem" required placeholder="Ex: https://exemplo.com/imagem.jpg">
                                     </div>
                                     
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -114,22 +129,22 @@
                                 <form id="formUsuario">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="nome" class="form-label">Nome Completo</label>
-                                            <input type="text" class="form-control" id="nome" required>
+                                            <label for="nome" class="form-label">Nome Completo <span class="required-star">*</span></label>
+                                            <input type="text" class="form-control" id="nome" required placeholder="Ex: Maria da Silva">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="email" class="form-label">E-mail</label>
-                                            <input type="email" class="form-control" id="email" required>
+                                            <label for="email" class="form-label">E-mail <span class="required-star">*</span></label>
+                                            <input type="email" class="form-control" id="email" required placeholder="Ex: usuario@dominio.com">
                                         </div>
                                     </div>
                                     
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="senha" class="form-label">Senha</label>
-                                            <input type="password" class="form-control" id="senha" required>
+                                            <label for="senha" class="form-label">Senha <span class="required-star">*</span></label>
+                                            <input type="password" class="form-control" id="senha" required placeholder="Mínimo 6 caracteres">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="tipoAcesso" class="form-label">Tipo de Acesso</label>
+                                            <label for="tipoAcesso" class="form-label">Tipo de Acesso <span class="required-star">*</span></label>
                                             <select class="form-select" id="tipoAcesso" required>
                                                 <option value="">Selecione...</option>
                                                 <option value="admin">Administrador</option>
