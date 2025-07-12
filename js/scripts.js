@@ -160,20 +160,20 @@ function exibirFilmesNaPaginaPrincipal(filmes, categoria) {
     if (!moviesGrid) return;
     
     if (!filmes || filmes.length === 0) {
-        moviesGrid.innerHTML = '<div class="col-12"><p class="text-center text-muted">Nenhum filme encontrado nesta categoria.</p></div>';
+        moviesGrid.innerHTML = '<div class="col-12"><p class="text-center">Nenhum filme encontrado nesta categoria.</p></div>';
         return;
     }
     
     var html = '';
     filmes.forEach(function(filme) {
         html += `
-            <div class="col-md-3 mb-4">
-                <div class="card movie-card" data-id="${filme._id}" style="cursor: pointer;">
-                    <img src="${filme.imagem}" class="card-img-top" alt="${filme.titulo}" style="height: 300px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">${filme.titulo}</h5>
-                        <p class="card-text">${filme.sinopse.substring(0, 100)}...</p>
-                        <button class="btn btn-primary btn-sm" onclick="abrirModalFilme('${filme._id}')">Ver Detalhes</button>
+            <div>
+                <div class="card movie-card h-100" data-id="${filme._id}" style="cursor: pointer;">
+                    <img src="${filme.imagem}" class="card-img-top" alt="${filme.titulo}">
+                    <div class="movie-hover-info">
+                        <div class="movie-hover-title">${filme.titulo}</div>
+                        ${filme.categoria ? `<div class='movie-hover-cat'>${filme.categoria.charAt(0).toUpperCase() + filme.categoria.slice(1)}</div>` : ''}
+                        ${filme.duracao ? `<div class='movie-hover-dur'>${filme.duracao} min</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -766,18 +766,16 @@ function atualizarGridRecentes() {
     var grid = document.getElementById('recentes-grid');
     if (!grid) return;
     if (!recentes.length) {
-        grid.innerHTML = '<div class="col-12"><p class="text-center text-muted">Nenhum filme visitado recentemente.</p></div>';
+        grid.innerHTML = '<div class="col-12"><p class="recent-empty-msg">NÃO HÁ FILMES VISUALIZADOS RECENTEMENTE</p></div>';
         return;
     }
     var html = '';
     recentes.forEach(function(filme) {
         html += `
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-                <div class="card h-100" style="cursor:pointer" onclick="abrirModalFilme('${filme._id}')">
-                    <img src="${filme.poster}" class="card-img-top" alt="${filme.titulo}" style="height:120px;object-fit:cover;">
-                    <div class="card-body p-2">
-                        <h6 class="card-title mb-0" style="font-size:0.95em">${filme.titulo}</h6>
-                    </div>
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3 d-flex justify-content-center">
+                <div class="card recent-card h-100" style="cursor:pointer" onclick="abrirModalFilme('${filme._id}')">
+                    <img src="${filme.poster}" class="card-img-top" alt="${filme.titulo}">
+                    <div class="recent-title-hover">${filme.titulo}</div>
                 </div>
             </div>
         `;
