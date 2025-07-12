@@ -171,6 +171,74 @@ body {
     font-size: 14px;
 }
 
+/* Modal de Detalhes do Filme */
+.modal-content {
+    background-color: var(--neteflix-dark-gray);
+    color: var(--neteflix-white);
+    border: 1px solid #333;
+}
+
+.modal-header {
+    border-bottom: 1px solid #333;
+    background-color: var(--neteflix-black);
+}
+
+.modal-title {
+    color: var(--neteflix-white);
+    font-weight: 600;
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.modal-body h4 {
+    color: var(--neteflix-white);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.modal-body h5 {
+    color: var(--neteflix-white);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.movie-meta .badge {
+    margin-right: 8px;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
+
+.modal-footer {
+    border-top: 1px solid #333;
+    background-color: var(--neteflix-black);
+}
+
+.modal-footer .btn-primary {
+    background-color: var(--neteflix-red);
+    border-color: var(--neteflix-red);
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #f40612;
+    border-color: #f40612;
+}
+
+.modal-footer .btn-secondary {
+    background-color: var(--neteflix-light-gray);
+    border-color: var(--neteflix-light-gray);
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #666;
+    border-color: #666;
+}
+
 /* Login Form */
 .login-form {
     background-color: rgba(0, 0, 0, 0.75);
@@ -260,5 +328,23 @@ footer {
     
     .login-form h2 {
         font-size: 24px;
+    }
+    
+    /* Responsividade para modal */
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-body .row {
+        flex-direction: column;
+    }
+    
+    .modal-body .col-md-4 {
+        margin-bottom: 20px;
+        text-align: center;
     }
 }
