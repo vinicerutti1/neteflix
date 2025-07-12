@@ -14,7 +14,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">NETEFLIX</a>
-            <div class="navbar-nav ms-auto">
+            <div class="navbar-nav ms-auto" id="user-info">
                 <a class="nav-link" href="login.html">Entrar</a>
             </div>
         </div>
@@ -34,7 +34,7 @@
         <div class="container">
             <h2>Categorias</h2>
             <div class="categories-list">
-                <button class="category-btn active" data-category="destaque">Destaque</button>
+                <button class="category-btn active" data-category="todos">Todos</button>
                 <button class="category-btn" data-category="acao">Ação</button>
                 <button class="category-btn" data-category="comedia">Comédia</button>
                 <button class="category-btn" data-category="drama">Drama</button>
@@ -44,12 +44,15 @@
         </div>
     </div>
 
-    <!-- Seção de Filmes em Destaque -->
+    <!-- Seção de Filmes -->
     <section class="movies-section">
         <div class="container">
-            <h2 id="section-title">Filmes em Destaque</h2>
+            <h2 id="section-title">Todos os Filmes</h2>
             <div class="movies-grid" id="movies-grid">
                 <!-- Filmes serão carregados dinamicamente aqui -->
+                <div class="col-12">
+                    <p class="text-center text-muted">Carregando filmes...</p>
+                </div>
             </div>
         </div>
     </section>
@@ -111,6 +114,8 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- PouchDB -->
+    <script src="https://cdn.jsdelivr.net/npm/pouchdb@7.3.1/dist/pouchdb.min.js"></script>
     <!-- Custom JS -->
     <script src="js/scripts.js"></script>
 </body>

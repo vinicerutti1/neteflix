@@ -81,7 +81,7 @@ function trocarCategoria(categoria) {
     var sectionTitle = document.getElementById('section-title');
     if (sectionTitle) {
         var titulos = {
-            'destaque': 'Filmes em Destaque',
+            'todos': 'Todos os Filmes',
             'acao': 'Filmes de Ação',
             'comedia': 'Filmes de Comédia',
             'drama': 'Filmes de Drama',
@@ -113,16 +113,20 @@ function carregarFilmesPorCategoria(categoria) {
             return row.doc;
         });
         
-        // Filtrar por categoria
-        var filmesFiltrados = filmes.filter(function(filme) {
-            return filme.categoria === categoria;
-        });
+        // Filtrar por categoria (se não for "todos")
+        var filmesFiltrados = filmes;
+        if (categoria !== 'todos') {
+            filmesFiltrados = filmes.filter(function(filme) {
+                return filme.categoria === categoria;
+            });
+        }
         
         // Exibir filmes na página principal
         exibirFilmesNaPaginaPrincipal(filmesFiltrados, categoria);
     })
     .catch(function(err) {
         console.error('Erro ao carregar filmes:', err);
+        document.getElementById('movies-grid').innerHTML = '<div class="col-12"><p class="text-center text-danger">Erro ao carregar filmes.</p></div>';
     });
 }
 
@@ -187,47 +191,113 @@ function validarLogin() {
 
 // Função para verificar credenciais no banco de dados
 function verificarCredenciais(email, senha) {
+    console.log('Verificando credenciais para:', email);
+    
     // Inicializar banco se ainda não foi inicializado
     if (!dbUsuarios) {
         dbUsuarios = new PouchDB('neteflix_usuarios');
     }
     
-    // Buscar usuário por email
-    dbUsuarios.allDocs({
-        include_docs: true,
-        startkey: 'usuario_',
-        endkey: 'usuario_\ufff0'
-    })
-    .then(function(result) {
-        var usuario = result.rows.find(function(row) {
-            return row.doc.email === email && row.doc.senha === senha;
-        });
-        
-        if (usuario) {
-            // Login bem-sucedido
-            alert('Login realizado com sucesso! Bem-vindo, ' + usuario.doc.nome + '!');
+    // Primeiro, garantir que os usuários padrão existam
+    criarUsuariosPadrao()
+        .then(function() {
+            // Agora buscar usuário por email
+            return dbUsuarios.allDocs({
+                include_docs: true,
+                startkey: 'usuario_',
+                endkey: 'usuario_\ufff0'
+            });
+        })
+        .then(function(result) {
+            console.log('Usuários encontrados:', result.rows.length);
             
-            // Salvar dados do usuário na sessão
-            sessionStorage.setItem('usuarioLogado', JSON.stringify({
-                id: usuario.doc._id,
-                nome: usuario.doc.nome,
-                email: usuario.doc.email,
-                tipoAcesso: usuario.doc.tipoAcesso
-            }));
+            var usuario = result.rows.find(function(row) {
+                console.log('Verificando usuário:', row.doc.email, 'vs', email);
+                return row.doc.email === email && row.doc.senha === senha;
+            });
             
-            // Redirecionar baseado no tipo de acesso
-            if (usuario.doc.tipoAcesso === 'admin') {
-                window.location.href = 'admin.html';
+            if (usuario) {
+                console.log('Usuário encontrado:', usuario.doc);
+                // Login bem-sucedido
+                alert('Login realizado com sucesso! Bem-vindo, ' + usuario.doc.nome + '!');
+                
+                // Salvar dados do usuário na sessão
+                sessionStorage.setItem('usuarioLogado', JSON.stringify({
+                    id: usuario.doc._id,
+                    nome: usuario.doc.nome,
+                    email: usuario.doc.email,
+                    tipoAcesso: usuario.doc.tipoAcesso
+                }));
+                
+                console.log('Redirecionando para:', usuario.doc.tipoAcesso === 'admin' ? 'admin.html' : 'index.html');
+                
+                // Redirecionar baseado no tipo de acesso
+                if (usuario.doc.tipoAcesso === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
             } else {
-                window.location.href = 'index.html';
+                console.log('Usuário não encontrado ou senha incorreta');
+                alert('Email ou senha incorretos! Verifique suas credenciais.');
             }
-        } else {
-            alert('Email ou senha incorretos!');
-        }
-    })
-    .catch(function(err) {
-        console.error('Erro ao verificar credenciais:', err);
-        alert('Erro ao fazer login. Tente novamente.');
+        })
+        .catch(function(err) {
+            console.error('Erro ao verificar credenciais:', err);
+            alert('Erro ao fazer login. Tente novamente.');
+        });
+}
+
+// Função para criar usuários padrão
+function criarUsuariosPadrao() {
+    return new Promise(function(resolve, reject) {
+        // Criar usuário administrador
+        var adminUser = {
+            _id: 'usuario_admin',
+            nome: 'Administrador',
+            email: 'admin@neteflix.com',
+            senha: 'admin123',
+            tipoAcesso: 'admin',
+            tipo: 'usuario',
+            criadoEm: new Date().toISOString()
+        };
+        
+        // Criar usuário cliente
+        var clienteUser = {
+            _id: 'usuario_cliente',
+            nome: 'Cliente',
+            email: 'cliente@neteflix.com',
+            senha: 'cliente123',
+            tipoAcesso: 'usuario',
+            tipo: 'usuario',
+            criadoEm: new Date().toISOString()
+        };
+        
+        // Criar ambos os usuários
+        Promise.all([
+            dbUsuarios.get('usuario_admin').catch(function(err) {
+                if (err.name === 'not_found') {
+                    console.log('Criando usuário administrador...');
+                    return dbUsuarios.put(adminUser);
+                }
+                throw err;
+            }),
+            dbUsuarios.get('usuario_cliente').catch(function(err) {
+                if (err.name === 'not_found') {
+                    console.log('Criando usuário cliente...');
+                    return dbUsuarios.put(clienteUser);
+                }
+                throw err;
+            })
+        ])
+        .then(function() {
+            console.log('Usuários padrão criados/verificados');
+            resolve();
+        })
+        .catch(function(err) {
+            console.error('Erro ao criar usuários padrão:', err);
+            reject(err);
+        });
     });
 }
 
@@ -275,12 +345,13 @@ function inicializarDadosPadrao() {
     dbUsuarios.get('usuario_admin')
         .catch(function(err) {
             if (err.name === 'not_found') {
+                console.log('Criando usuário administrador...');
                 return dbUsuarios.put(adminUser);
             }
             throw err;
         })
         .then(function() {
-            console.log('Usuário administrador criado');
+            console.log('Usuário administrador criado/verificado');
         })
         .catch(function(err) {
             console.error('Erro ao criar usuário administrador:', err);
@@ -290,12 +361,13 @@ function inicializarDadosPadrao() {
     dbUsuarios.get('usuario_cliente')
         .catch(function(err) {
             if (err.name === 'not_found') {
+                console.log('Criando usuário cliente...');
                 return dbUsuarios.put(clienteUser);
             }
             throw err;
         })
         .then(function() {
-            console.log('Usuário cliente criado');
+            console.log('Usuário cliente criado/verificado');
         })
         .catch(function(err) {
             console.error('Erro ao criar usuário cliente:', err);
@@ -670,10 +742,32 @@ document.addEventListener('DOMContentLoaded', function() {
     var loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
+        // Inicializar banco de usuários para a página de login
+        if (!dbUsuarios) {
+            dbUsuarios = new PouchDB('neteflix_usuarios');
+            console.log('Banco de usuários inicializado');
+        }
+        
+        // Verificar se já está logado
+        var usuarioLogado = sessionStorage.getItem('usuarioLogado');
+        if (usuarioLogado) {
+            var usuario = JSON.parse(usuarioLogado);
+            alert('Você já está logado como ' + usuario.nome + '!');
+            if (usuario.tipoAcesso === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+            return;
+        }
+        
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault(); // Previne o envio padrão do formulário
+            console.log('Formulário de login submetido');
             validarLogin();
         });
+        
+        console.log('Página de login carregada com sucesso');
     }
     
     // Verificar se estamos na página de administração
@@ -681,6 +775,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var formUsuario = document.getElementById('formUsuario');
     
     if (formFilme || formUsuario) {
+        // Verificar permissões de administrador
+        if (!verificarPermissoes('admin')) {
+            return;
+        }
+        
         // Inicializar bancos de dados
         inicializarBancos();
         
@@ -702,13 +801,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar se estamos na página inicial
     var moviesGrid = document.getElementById('movies-grid');
     if (moviesGrid) {
+        // Verificar autenticação
+        if (!verificarAutenticacao()) {
+            return;
+        }
+        
         // Inicializar banco de filmes se necessário
         if (!dbFilmes) {
             dbFilmes = new PouchDB('neteflix_filmes');
         }
         
-        // Carregar filmes em destaque por padrão
-        carregarFilmesPorCategoria('acao');
+        // Carregar todos os filmes por padrão
+        carregarFilmesPorCategoria('todos');
         
         // Adicionar eventos aos botões de categoria
         var botoesCategoria = document.querySelectorAll('.category-btn');
@@ -734,6 +838,40 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Script carregado com sucesso!');
 });
 
+// ===== FUNÇÕES DE PROTEÇÃO DE ACESSO =====
+
+// Função para verificar se o usuário está autenticado
+function verificarAutenticacao() {
+    var usuarioLogado = sessionStorage.getItem('usuarioLogado');
+    if (!usuarioLogado) {
+        alert('Você precisa estar logado para acessar esta página!');
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+// Função para verificar permissões de acesso
+function verificarPermissoes(tipoPermitido) {
+    var usuarioLogado = sessionStorage.getItem('usuarioLogado');
+    if (!usuarioLogado) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    var usuario = JSON.parse(usuarioLogado);
+    if (usuario.tipoAcesso !== tipoPermitido) {
+        alert('Você não tem permissão para acessar esta página!');
+        if (usuario.tipoAcesso === 'admin') {
+            window.location.href = 'admin.html';
+        } else {
+            window.location.href = 'index.html';
+        }
+        return false;
+    }
+    return true;
+}
+
 // Função para verificar se há usuário logado
 function verificarUsuarioLogado() {
     var usuarioLogado = sessionStorage.getItem('usuarioLogado');
@@ -749,7 +887,9 @@ function verificarUsuarioLogado() {
                 <button class="btn btn-outline-light btn-sm" onclick="fazerLogout()">Sair</button>
             `;
         }
+        return usuario;
     }
+    return null;
 }
 
 // Função para fazer logout
