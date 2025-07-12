@@ -72,6 +72,24 @@
         .recent-card:hover .recent-title-hover {
             opacity: 1;
         }
+        #modal-description {
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .desc-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        #modal-leia-mais {
+            color: #e50914 !important;
+            font-weight: bold;
+            font-size: 0.98em;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-left: 2px;
+        }
     </style>
 </head>
 <body>
@@ -142,16 +160,11 @@
                         <div class="col-md-8">
                             <h4 id="modal-title">Título do Filme</h4>
                             <div class="movie-meta mb-3">
-                                <span id="modal-year" class="badge bg-secondary">2024</span>
                                 <span id="modal-genre" class="badge bg-primary">Gênero</span>
-                                <span id="modal-duration" class="badge bg-info">120 min</span>
                             </div>
-                            <p id="modal-description" class="text-muted">
-                                Descrição do filme será carregada aqui...
-                            </p>
+                            <p id="modal-description" class="text-white" style="font-size:1.05em; line-height:1.5;"></p>
                         </div>
                     </div>
-                    
                     <!-- Seção do Trailer -->
                     <div class="mt-4">
                         <h5>Trailer</h5>
@@ -165,10 +178,6 @@
                             </iframe>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary">Assistir</button>
                 </div>
             </div>
         </div>

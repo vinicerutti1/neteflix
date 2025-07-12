@@ -64,7 +64,8 @@
                                     
                                     <div class="mb-3">
                                         <label for="sinopse" class="form-label">Sinopse</label>
-                                        <textarea class="form-control" id="sinopse" rows="3" required></textarea>
+                                        <textarea class="form-control" id="sinopse" rows="3" maxlength="350" required oninput="atualizarContadorSinopse()"></textarea>
+                                        <div class="text-end small"><span id="contador-sinopse">0</span>/350 caracteres</div>
                                     </div>
                                     
                                     <div class="mb-3">
@@ -169,5 +170,32 @@
     <script src="https://cdn.jsdelivr.net/npm/pouchdb@7.3.1/dist/pouchdb.min.js"></script>
     <!-- Custom JS -->
     <script src="js/scripts.js"></script>
+    <script>
+function atualizarContadorSinopse() {
+    var sinopse = document.getElementById('sinopse');
+    var contador = document.getElementById('contador-sinopse');
+    if (sinopse && contador) {
+        contador.textContent = sinopse.value.length;
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    function bindContadorSinopse() {
+        var sinopse = document.getElementById('sinopse');
+        if (sinopse) {
+            atualizarContadorSinopse();
+            sinopse.removeEventListener('input', atualizarContadorSinopse);
+            sinopse.addEventListener('input', atualizarContadorSinopse);
+        }
+    }
+    bindContadorSinopse();
+    // Atualizar contador ao trocar de aba para cadastro de filmes
+    var filmesTab = document.getElementById('filmes-tab');
+    if (filmesTab) {
+        filmesTab.addEventListener('click', function() {
+            setTimeout(bindContadorSinopse, 100);
+        });
+    }
+});
+</script>
 </body>
 </html>
