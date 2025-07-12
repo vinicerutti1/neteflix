@@ -12,6 +12,7 @@ function abrirModalFilme(filmeId) {
         .then(function(filme) {
             // Converter dados do filme para o formato do modal
             var dadosFilme = {
+                _id: filme._id,
                 titulo: filme.titulo,
                 ano: '2024', // Ano padrão
                 genero: filme.categoria,
@@ -20,6 +21,9 @@ function abrirModalFilme(filmeId) {
                 poster: filme.imagem,
                 trailer: filme.trailer.replace('watch?v=', 'embed/')
             };
+            
+            // Salvar nos filmes visitados recentemente
+            adicionarFilmeRecente(dadosFilme);
             
             // Atualizar elementos do modal
             atualizarModalFilme(dadosFilme);
@@ -32,6 +36,26 @@ function abrirModalFilme(filmeId) {
             console.error('Erro ao carregar filme:', err);
             alert('Erro ao carregar dados do filme.');
         });
+}
+
+// Função para adicionar filme à lista de visitados recentemente
+function adicionarFilmeRecente(filme) {
+    var recentes = JSON.parse(localStorage.getItem('recentesFilmes') || '[]');
+    // Remove se já existir
+    recentes = recentes.filter(function(f) { return f._id !== filme._id; });
+    // Adiciona no início
+    recentes.unshift({
+        _id: filme._id,
+        titulo: filme.titulo,
+        poster: filme.poster
+    });
+    // Limita a 5 filmes
+    if (recentes.length > 5) {
+        recentes = recentes.slice(0, 5);
+    }
+    localStorage.setItem('recentesFilmes', JSON.stringify(recentes));
+    // Atualiza o grid se existir na página
+    if (typeof atualizarGridRecentes === 'function') atualizarGridRecentes();
 }
 
 // Função para atualizar o modal com dados do filme
@@ -235,7 +259,7 @@ function verificarCredenciais(email, senha) {
                 if (usuario.doc.tipoAcesso === 'admin') {
                     window.location.href = 'admin.html';
                 } else {
-                    window.location.href = 'index.html';
+                    window.location.href = 'cliente.html';
                 }
             } else {
                 console.log('Usuário não encontrado ou senha incorreta');
@@ -734,6 +758,36 @@ function processarFormUsuario(event) {
     }
     
     cadastrarUsuario(dados);
+}
+
+// Função para atualizar o grid de visitados recentemente
+function atualizarGridRecentes() {
+    var recentes = JSON.parse(localStorage.getItem('recentesFilmes') || '[]');
+    var grid = document.getElementById('recentes-grid');
+    if (!grid) return;
+    if (!recentes.length) {
+        grid.innerHTML = '<div class="col-12"><p class="text-center text-muted">Nenhum filme visitado recentemente.</p></div>';
+        return;
+    }
+    var html = '';
+    recentes.forEach(function(filme) {
+        html += `
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+                <div class="card h-100" style="cursor:pointer" onclick="abrirModalFilme('${filme._id}')">
+                    <img src="${filme.poster}" class="card-img-top" alt="${filme.titulo}" style="height:120px;object-fit:cover;">
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-0" style="font-size:0.95em">${filme.titulo}</h6>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    grid.innerHTML = html;
+}
+
+// Chamar atualizarGridRecentes ao carregar a página cliente.html
+if (document.getElementById('recentes-grid')) {
+    document.addEventListener('DOMContentLoaded', atualizarGridRecentes);
 }
 
 // Adicionar eventos quando a página carregar
