@@ -23,6 +23,13 @@ body {
     line-height: 1.6;
 }
 
+/* Background para todas as páginas exceto a inicial */
+body:not(.index-page) {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('../images/background-index.jpg') center/cover no-repeat fixed;
+    min-height: 100vh;
+}
+
 /* Navbar */
 .navbar {
     background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
@@ -83,9 +90,8 @@ body {
 
 /* Menu de Categorias */
 .categories-menu {
-    background-color: var(--neteflix-dark-gray);
+    background-color: rgba(0, 0, 0, 0.7);
     padding: 30px 0;
-    border-bottom: 1px solid #333;
 }
 
 .categories-menu h2 {
@@ -123,6 +129,7 @@ body {
 
 /* Seção de Filmes */
 .movies-section {
+    background-color: rgba(0, 0, 0, 0.7);
     padding: 50px 0;
 }
 
