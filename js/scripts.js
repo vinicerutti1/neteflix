@@ -1,25 +1,37 @@
 // Função para abrir modal com detalhes do filme
 function abrirModalFilme(filmeId) {
-    // Aqui futuramente será feita a requisição para o banco de dados
     console.log('Abrindo modal para filme ID:', filmeId);
     
-    // Estrutura preparada para receber dados do backend
-    var dadosFilme = {
-        titulo: 'Título do Filme',
-        ano: '2024',
-        genero: 'Ação',
-        duracao: '120 min',
-        descricao: 'Descrição do filme será carregada aqui...',
-        poster: 'https://via.placeholder.com/300x450/333/666?text=Poster',
-        trailer: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    };
+    // Inicializar banco se ainda não foi inicializado
+    if (!dbFilmes) {
+        dbFilmes = new PouchDB('neteflix_filmes');
+    }
     
-    // Atualizar elementos do modal
-    atualizarModalFilme(dadosFilme);
-    
-    // Abrir modal
-    var modal = new bootstrap.Modal(document.getElementById('movieModal'));
-    modal.show();
+    // Buscar dados do filme no banco de dados
+    dbFilmes.get(filmeId)
+        .then(function(filme) {
+            // Converter dados do filme para o formato do modal
+            var dadosFilme = {
+                titulo: filme.titulo,
+                ano: '2024', // Ano padrão
+                genero: filme.categoria,
+                duracao: '120 min', // Duração padrão
+                descricao: filme.sinopse,
+                poster: filme.imagem,
+                trailer: filme.trailer.replace('watch?v=', 'embed/')
+            };
+            
+            // Atualizar elementos do modal
+            atualizarModalFilme(dadosFilme);
+            
+            // Abrir modal
+            var modal = new bootstrap.Modal(document.getElementById('movieModal'));
+            modal.show();
+        })
+        .catch(function(err) {
+            console.error('Erro ao carregar filme:', err);
+            alert('Erro ao carregar dados do filme.');
+        });
 }
 
 // Função para atualizar o modal com dados do filme
@@ -80,8 +92,67 @@ function trocarCategoria(categoria) {
         sectionTitle.textContent = titulos[categoria] || 'Filmes';
     }
     
-    // Aqui futuramente será carregado os filmes do banco de dados
-    console.log('Categoria selecionada:', categoria);
+    // Carregar filmes do banco de dados
+    carregarFilmesPorCategoria(categoria);
+}
+
+// Função para carregar filmes por categoria
+function carregarFilmesPorCategoria(categoria) {
+    // Inicializar banco se ainda não foi inicializado
+    if (!dbFilmes) {
+        dbFilmes = new PouchDB('neteflix_filmes');
+    }
+    
+    dbFilmes.allDocs({
+        include_docs: true,
+        startkey: 'filme_',
+        endkey: 'filme_\ufff0'
+    })
+    .then(function(result) {
+        var filmes = result.rows.map(function(row) {
+            return row.doc;
+        });
+        
+        // Filtrar por categoria
+        var filmesFiltrados = filmes.filter(function(filme) {
+            return filme.categoria === categoria;
+        });
+        
+        // Exibir filmes na página principal
+        exibirFilmesNaPaginaPrincipal(filmesFiltrados, categoria);
+    })
+    .catch(function(err) {
+        console.error('Erro ao carregar filmes:', err);
+    });
+}
+
+// Função para exibir filmes na página principal
+function exibirFilmesNaPaginaPrincipal(filmes, categoria) {
+    var moviesGrid = document.getElementById('movies-grid');
+    if (!moviesGrid) return;
+    
+    if (!filmes || filmes.length === 0) {
+        moviesGrid.innerHTML = '<div class="col-12"><p class="text-center text-muted">Nenhum filme encontrado nesta categoria.</p></div>';
+        return;
+    }
+    
+    var html = '';
+    filmes.forEach(function(filme) {
+        html += `
+            <div class="col-md-3 mb-4">
+                <div class="card movie-card" data-id="${filme._id}" style="cursor: pointer;">
+                    <img src="${filme.imagem}" class="card-img-top" alt="${filme.titulo}" style="height: 300px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">${filme.titulo}</h5>
+                        <p class="card-text">${filme.sinopse.substring(0, 100)}...</p>
+                        <button class="btn btn-primary btn-sm" onclick="abrirModalFilme('${filme._id}')">Ver Detalhes</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    moviesGrid.innerHTML = html;
 }
 
 // Função para validar o formulário de login
@@ -108,13 +179,142 @@ function validarLogin() {
         return false;
     }
     
-    // Se tudo estiver ok, mostrar mensagem de sucesso
-    alert('Login realizado com sucesso!');
-    
-    // Redirecionar para a página principal (simulação)
-    window.location.href = 'index.html';
+    // Verificar credenciais no banco de dados
+    verificarCredenciais(email, senha);
     
     return false; // Previne o envio do formulário
+}
+
+// Função para verificar credenciais no banco de dados
+function verificarCredenciais(email, senha) {
+    // Inicializar banco se ainda não foi inicializado
+    if (!dbUsuarios) {
+        dbUsuarios = new PouchDB('neteflix_usuarios');
+    }
+    
+    // Buscar usuário por email
+    dbUsuarios.allDocs({
+        include_docs: true,
+        startkey: 'usuario_',
+        endkey: 'usuario_\ufff0'
+    })
+    .then(function(result) {
+        var usuario = result.rows.find(function(row) {
+            return row.doc.email === email && row.doc.senha === senha;
+        });
+        
+        if (usuario) {
+            // Login bem-sucedido
+            alert('Login realizado com sucesso! Bem-vindo, ' + usuario.doc.nome + '!');
+            
+            // Salvar dados do usuário na sessão
+            sessionStorage.setItem('usuarioLogado', JSON.stringify({
+                id: usuario.doc._id,
+                nome: usuario.doc.nome,
+                email: usuario.doc.email,
+                tipoAcesso: usuario.doc.tipoAcesso
+            }));
+            
+            // Redirecionar baseado no tipo de acesso
+            if (usuario.doc.tipoAcesso === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        } else {
+            alert('Email ou senha incorretos!');
+        }
+    })
+    .catch(function(err) {
+        console.error('Erro ao verificar credenciais:', err);
+        alert('Erro ao fazer login. Tente novamente.');
+    });
+}
+
+// ===== INICIALIZAÇÃO DO BANCO DE DADOS COM DADOS MOCKADOS =====
+
+// Função para inicializar dados padrão
+function inicializarDadosPadrao() {
+    console.log('Inicializando dados padrão...');
+    
+    // Criar usuário administrador
+    var adminUser = {
+        _id: 'usuario_admin',
+        nome: 'Administrador',
+        email: 'admin@neteflix.com',
+        senha: 'admin123',
+        tipoAcesso: 'admin',
+        tipo: 'usuario',
+        criadoEm: new Date().toISOString()
+    };
+    
+    // Criar usuário cliente
+    var clienteUser = {
+        _id: 'usuario_cliente',
+        nome: 'Cliente',
+        email: 'cliente@neteflix.com',
+        senha: 'cliente123',
+        tipoAcesso: 'usuario',
+        tipo: 'usuario',
+        criadoEm: new Date().toISOString()
+    };
+    
+    // Criar filme padrão
+    var filmePadrao = {
+        _id: 'filme_john_wick',
+        titulo: 'John Wick - De Volta Ao Jogo',
+        categoria: 'acao',
+        sinopse: 'essa é a descrição',
+        trailer: 'https://www.youtube.com/watch?v=rUKOAwlyNag',
+        imagem: 'https://br.web.img3.acsta.net/pictures/14/10/27/20/07/170589.jpg',
+        tipo: 'filme',
+        criadoEm: new Date().toISOString()
+    };
+    
+    // Adicionar usuário administrador
+    dbUsuarios.get('usuario_admin')
+        .catch(function(err) {
+            if (err.name === 'not_found') {
+                return dbUsuarios.put(adminUser);
+            }
+            throw err;
+        })
+        .then(function() {
+            console.log('Usuário administrador criado');
+        })
+        .catch(function(err) {
+            console.error('Erro ao criar usuário administrador:', err);
+        });
+    
+    // Adicionar usuário cliente
+    dbUsuarios.get('usuario_cliente')
+        .catch(function(err) {
+            if (err.name === 'not_found') {
+                return dbUsuarios.put(clienteUser);
+            }
+            throw err;
+        })
+        .then(function() {
+            console.log('Usuário cliente criado');
+        })
+        .catch(function(err) {
+            console.error('Erro ao criar usuário cliente:', err);
+        });
+    
+    // Adicionar filme padrão
+    dbFilmes.get('filme_john_wick')
+        .catch(function(err) {
+            if (err.name === 'not_found') {
+                return dbFilmes.put(filmePadrao);
+            }
+            throw err;
+        })
+        .then(function() {
+            console.log('Filme padrão criado');
+        })
+        .catch(function(err) {
+            console.error('Erro ao criar filme padrão:', err);
+        });
 }
 
 // ===== FUNÇÕES PARA ADMINISTRAÇÃO =====
@@ -484,6 +684,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Inicializar bancos de dados
         inicializarBancos();
         
+        // Inicializar dados padrão
+        inicializarDadosPadrao();
+        
         // Carregar dados existentes
         if (formFilme) {
             carregarFilmes();
@@ -499,6 +702,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar se estamos na página inicial
     var moviesGrid = document.getElementById('movies-grid');
     if (moviesGrid) {
+        // Inicializar banco de filmes se necessário
+        if (!dbFilmes) {
+            dbFilmes = new PouchDB('neteflix_filmes');
+        }
+        
+        // Carregar filmes em destaque por padrão
+        carregarFilmesPorCategoria('acao');
+        
         // Adicionar eventos aos botões de categoria
         var botoesCategoria = document.querySelectorAll('.category-btn');
         botoesCategoria.forEach(function(botao) {
@@ -508,8 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Adicionar evento de clique nos cards de filme (quando existirem)
-        // Futuramente, quando os filmes forem carregados dinamicamente
+        // Adicionar evento de clique nos cards de filme
         document.addEventListener('click', function(e) {
             if (e.target.closest('.movie-card')) {
                 var filmeId = e.target.closest('.movie-card').getAttribute('data-id') || '1';
@@ -518,5 +728,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Verificar se há usuário logado
+    verificarUsuarioLogado();
+    
     console.log('Script carregado com sucesso!');
-}); 
+});
+
+// Função para verificar se há usuário logado
+function verificarUsuarioLogado() {
+    var usuarioLogado = sessionStorage.getItem('usuarioLogado');
+    if (usuarioLogado) {
+        var usuario = JSON.parse(usuarioLogado);
+        console.log('Usuário logado:', usuario.nome);
+        
+        // Atualizar interface se houver elementos para mostrar o usuário
+        var userInfo = document.getElementById('user-info');
+        if (userInfo) {
+            userInfo.innerHTML = `
+                <span class="navbar-text me-3">Olá, ${usuario.nome}!</span>
+                <button class="btn btn-outline-light btn-sm" onclick="fazerLogout()">Sair</button>
+            `;
+        }
+    }
+}
+
+// Função para fazer logout
+function fazerLogout() {
+    sessionStorage.removeItem('usuarioLogado');
+    alert('Logout realizado com sucesso!');
+    window.location.href = 'login.html';
+} 
