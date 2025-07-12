@@ -21,26 +21,142 @@
     
     <div class="container mt-4">
         <h1>Painel Administrativo</h1>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Gerenciar Filmes</h5>
+        
+        <!-- Abas de navegação -->
+        <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="filmes-tab" data-bs-toggle="tab" data-bs-target="#filmes" type="button" role="tab">Cadastro de Filmes</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab">Cadastro de Usuários</button>
+            </li>
+        </ul>
+        
+        <!-- Conteúdo das abas -->
+        <div class="tab-content" id="adminTabsContent">
+            <!-- Aba de Filmes -->
+            <div class="tab-pane fade show active" id="filmes" role="tabpanel">
+                <div class="row mt-3">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Cadastrar Novo Filme</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="formFilme">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="titulo" class="form-label">Título do Filme</label>
+                                            <input type="text" class="form-control" id="titulo" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="categoria" class="form-label">Categoria</label>
+                                            <select class="form-select" id="categoria" required>
+                                                <option value="">Selecione...</option>
+                                                <option value="acao">Ação</option>
+                                                <option value="comedia">Comédia</option>
+                                                <option value="drama">Drama</option>
+                                                <option value="ficcao">Ficção</option>
+                                                <option value="terror">Terror</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="sinopse" class="form-label">Sinopse</label>
+                                        <textarea class="form-control" id="sinopse" rows="3" required></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="trailer" class="form-label">URL do Trailer</label>
+                                        <input type="url" class="form-control" id="trailer" placeholder="https://www.youtube.com/watch?v=..." required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="imagem" class="form-label">URL da Imagem</label>
+                                        <input type="url" class="form-control" id="imagem" placeholder="https://exemplo.com/imagem.jpg" required>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="button" class="btn btn-secondary me-md-2" onclick="limparFormFilme()">Limpar</button>
+                                        <button type="submit" class="btn btn-primary">Cadastrar Filme</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <button class="btn btn-primary">Adicionar Filme</button>
-                        <button class="btn btn-secondary">Editar Filmes</button>
+                    
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Filmes Cadastrados</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="listaFilmes">
+                                    <p class="text-muted">Nenhum filme cadastrado.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Gerenciar Usuários</h5>
+            
+            <!-- Aba de Usuários -->
+            <div class="tab-pane fade" id="usuarios" role="tabpanel">
+                <div class="row mt-3">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Cadastrar Novo Usuário</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="formUsuario">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="nome" class="form-label">Nome Completo</label>
+                                            <input type="text" class="form-control" id="nome" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="email" class="form-label">E-mail</label>
+                                            <input type="email" class="form-control" id="email" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="senha" class="form-label">Senha</label>
+                                            <input type="password" class="form-control" id="senha" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="tipoAcesso" class="form-label">Tipo de Acesso</label>
+                                            <select class="form-select" id="tipoAcesso" required>
+                                                <option value="">Selecione...</option>
+                                                <option value="admin">Administrador</option>
+                                                <option value="usuario">Usuário Comum</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="button" class="btn btn-secondary me-md-2" onclick="limparFormUsuario()">Limpar</button>
+                                        <button type="submit" class="btn btn-primary">Cadastrar Usuário</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <button class="btn btn-primary">Ver Usuários</button>
-                        <button class="btn btn-secondary">Relatórios</button>
+                    
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Usuários Cadastrados</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="listaUsuarios">
+                                    <p class="text-muted">Nenhum usuário cadastrado.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -49,6 +165,8 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- PouchDB -->
+    <script src="https://cdn.jsdelivr.net/npm/pouchdb@7.3.1/dist/pouchdb.min.js"></script>
     <!-- Custom JS -->
     <script src="js/scripts.js"></script>
 </body>
