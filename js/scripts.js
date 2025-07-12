@@ -63,14 +63,11 @@ function atualizarModalFilme(dados) {
     // Atualizar elementos do modal
     var elementos = {
         'modal-title': dados.titulo,
-        'modal-year': dados.ano,
         'modal-genre': dados.genero,
-        'modal-duration': dados.duracao,
         'modal-description': dados.descricao,
         'modal-poster': dados.poster,
         'modal-trailer': dados.trailer
     };
-    
     // Atualizar cada elemento
     for (var id in elementos) {
         var elemento = document.getElementById(id);
@@ -80,6 +77,10 @@ function atualizarModalFilme(dados) {
                 elemento.alt = dados.titulo;
             } else if (id === 'modal-trailer') {
                 elemento.src = elementos[id];
+            } else if (id === 'modal-description') {
+                const desc = elementos[id] || '';
+                elemento.textContent = desc;
+                elemento.classList.remove('desc-clamp');
             } else {
                 elemento.textContent = elementos[id];
             }
