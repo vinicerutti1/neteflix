@@ -1,0 +1,149 @@
+/* Estilos personalizados para o Neteflix */
+
+/* Variáveis CSS */
+:root {
+    --neteflix-red: #e50914;
+    --neteflix-black: #000000;
+    --neteflix-dark-gray: #141414;
+    --neteflix-light-gray: #808080;
+    --neteflix-white: #ffffff;
+}
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--neteflix-black);
+    color: var(--neteflix-white);
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+    padding: 20px 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+/* Login Form */
+.login-form {
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 60px 68px 40px;
+    border-radius: 4px;
+    margin-top: 100px;
+}
+
+.login-form h2 {
+    color: var(--neteflix-white);
+    margin-bottom: 28px;
+    font-size: 32px;
+    font-weight: 500;
+}
+
+.login-form .form-control {
+    background-color: #333;
+    border: none;
+    color: var(--neteflix-white);
+    padding: 16px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.login-form .form-control::placeholder {
+    color: var(--neteflix-light-gray);
+}
+
+.login-form .btn-primary {
+    background-color: var(--neteflix-red);
+    border: none;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.login-form .btn-primary:hover {
+    background-color: #f40612;
+}
+
+.login-form a {
+    color: var(--neteflix-light-gray);
+    text-decoration: none;
+}
+
+.login-form a:hover {
+    color: var(--neteflix-white);
+}
+
+/* Main Content */
+main {
+    margin-top: 80px;
+    padding: 20px;
+}
+
+/* Carrossel de filmes */
+#carrossel-filmes {
+    margin-top: 20px;
+}
+
+/* Cards de filmes */
+.movie-card {
+    background-color: var(--neteflix-dark-gray);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.movie-card:hover {
+    transform: scale(1.05);
+}
+
+.movie-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.movie-card .card-body {
+    padding: 15px;
+}
+
+.movie-card .card-title {
+    color: var(--neteflix-white);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Footer */
+footer {
+    background-color: var(--neteflix-dark-gray);
+    padding: 40px 0;
+    margin-top: 50px;
+    text-align: center;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .login-form {
+        padding: 40px 20px;
+        margin-top: 50px;
+    }
+    
+    .login-form h2 {
+        font-size: 24px;
+    }
+    
+    main {
+        margin-top: 60px;
+        padding: 10px;
+    }
+}
