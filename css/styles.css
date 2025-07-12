@@ -23,14 +23,152 @@ body {
     line-height: 1.6;
 }
 
-/* Header */
-header {
-    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+/* Navbar */
+.navbar {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
     padding: 20px 0;
-    position: fixed;
-    top: 0;
-    width: 100%;
     z-index: 1000;
+}
+
+.navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--neteflix-red) !important;
+}
+
+.nav-link {
+    color: var(--neteflix-white) !important;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--neteflix-red) !important;
+}
+
+/* Hero Banner */
+.hero-banner {
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                url('https://via.placeholder.com/1920x1080/333/666?text=Neteflix+Banner') center/cover;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: -76px; /* Compensar navbar fixo */
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: var(--neteflix-light-gray);
+}
+
+.hero-content .btn-primary {
+    background-color: var(--neteflix-red);
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.hero-content .btn-primary:hover {
+    background-color: #f40612;
+}
+
+/* Menu de Categorias */
+.categories-menu {
+    background-color: var(--neteflix-dark-gray);
+    padding: 30px 0;
+    border-bottom: 1px solid #333;
+}
+
+.categories-menu h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.categories-list {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    background-color: transparent;
+    border: 2px solid var(--neteflix-light-gray);
+    color: var(--neteflix-white);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.category-btn:hover {
+    border-color: var(--neteflix-red);
+    color: var(--neteflix-red);
+}
+
+.category-btn.active {
+    background-color: var(--neteflix-red);
+    border-color: var(--neteflix-red);
+    color: var(--neteflix-white);
+}
+
+/* Seção de Filmes */
+.movies-section {
+    padding: 50px 0;
+}
+
+.movies-section h2 {
+    margin-bottom: 30px;
+    font-size: 2rem;
+}
+
+.movies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.movie-card {
+    background-color: var(--neteflix-dark-gray);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.movie-card:hover {
+    transform: scale(1.05);
+}
+
+.movie-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.movie-card .card-body {
+    padding: 15px;
+}
+
+.movie-card .card-title {
+    color: var(--neteflix-white);
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.movie-card .card-text {
+    color: var(--neteflix-light-gray);
+    font-size: 14px;
 }
 
 /* Login Form */
@@ -83,56 +221,38 @@ header {
     color: var(--neteflix-white);
 }
 
-/* Main Content */
-main {
-    margin-top: 80px;
-    padding: 20px;
-}
-
-/* Carrossel de filmes */
-#carrossel-filmes {
-    margin-top: 20px;
-}
-
-/* Cards de filmes */
-.movie-card {
-    background-color: var(--neteflix-dark-gray);
-    border-radius: 4px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    margin-bottom: 20px;
-}
-
-.movie-card:hover {
-    transform: scale(1.05);
-}
-
-.movie-card img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-}
-
-.movie-card .card-body {
-    padding: 15px;
-}
-
-.movie-card .card-title {
-    color: var(--neteflix-white);
-    font-size: 16px;
-    font-weight: 500;
-}
-
 /* Footer */
 footer {
     background-color: var(--neteflix-dark-gray);
     padding: 40px 0;
-    margin-top: 50px;
     text-align: center;
+    border-top: 1px solid #333;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-content p {
+        font-size: 1.2rem;
+    }
+    
+    .categories-list {
+        justify-content: center;
+    }
+    
+    .category-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .movies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
     .login-form {
         padding: 40px 20px;
         margin-top: 50px;
@@ -140,10 +260,5 @@ footer {
     
     .login-form h2 {
         font-size: 24px;
-    }
-    
-    main {
-        margin-top: 60px;
-        padding: 10px;
     }
 }
