@@ -254,7 +254,7 @@ function verificarCredenciais(email, senha) {
                     tipoAcesso: usuario.doc.tipoAcesso
                 }));
                 
-                console.log('Redirecionando para:', usuario.doc.tipoAcesso === 'admin' ? 'admin.html' : 'index.html');
+                console.log('Redirecionando para:', usuario.doc.tipoAcesso === 'admin' ? 'admin.html' : 'cliente.html');
                 
                 // Redirecionar baseado no tipo de acesso
                 if (usuario.doc.tipoAcesso === 'admin') {
@@ -808,27 +808,24 @@ if (window.location.pathname.includes('login.html')) {
 
 // Adicionar eventos quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
+    // Verificar redirecionamento para usuários já autenticados
+    if (verificarUsuarioAutenticado()) {
+        return; // Se redirecionou, não continuar com o resto da inicialização
+    }
+    
     // Verificar se estamos na página de login
     var loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
+        // Verificar se usuário já está logado e redirecionar
+        if (redirecionarSeLogado()) {
+            return;
+        }
+        
         // Inicializar banco de usuários para a página de login
         if (!dbUsuarios) {
             dbUsuarios = new PouchDB('neteflix_usuarios');
             console.log('Banco de usuários inicializado');
-        }
-        
-        // Verificar se já está logado
-        var usuarioLogado = sessionStorage.getItem('usuarioLogado');
-        if (usuarioLogado) {
-            var usuario = JSON.parse(usuarioLogado);
-            alert('Você já está logado como ' + usuario.nome + '!');
-            if (usuario.tipoAcesso === 'admin') {
-                window.location.href = 'admin.html';
-            } else {
-                window.location.href = 'index.html';
-            }
-            return;
         }
         
         loginForm.addEventListener('submit', function(e) {
@@ -871,10 +868,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar se estamos na página inicial
     var moviesGrid = document.getElementById('movies-grid');
     if (moviesGrid) {
-        // Verificar autenticação
-        if (!verificarAutenticacao()) {
-            return;
-        }
+        // A página inicial não precisa de autenticação
         
         // Inicializar banco de filmes se necessário
         if (!dbFilmes) {
@@ -902,11 +896,76 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Verificar se estamos na página do cliente
+    if (window.location.pathname.includes('cliente.html')) {
+        // Verificar autenticação para página do cliente
+        if (!verificarAutenticacao()) {
+            return;
+        }
+    }
+    
     // Verificar se há usuário logado
     verificarUsuarioLogado();
     
     console.log('Script carregado com sucesso!');
 });
+
+// ===== FUNÇÕES DE REDIRECIONAMENTO PARA USUÁRIOS AUTENTICADOS =====
+
+// Função para verificar se o usuário está logado e redirecionar se necessário
+function verificarUsuarioAutenticado() {
+    var usuarioLogado = sessionStorage.getItem('usuarioLogado');
+    if (usuarioLogado) {
+        var usuario = JSON.parse(usuarioLogado);
+        console.log('Usuário já autenticado:', usuario.nome, 'Tipo:', usuario.tipoAcesso);
+        
+        // Se estiver na página de login, redirecionar
+        if (window.location.pathname.includes('login.html')) {
+            if (usuario.tipoAcesso === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'cliente.html';
+            }
+            return true;
+        }
+        
+        // Se estiver na página inicial e clicar em "Começar", redirecionar
+        if (window.location.pathname.includes('index.html')) {
+            // Adicionar evento ao botão "Começar"
+            var btnComecar = document.querySelector('.hero-content .btn-primary');
+            if (btnComecar) {
+                btnComecar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (usuario.tipoAcesso === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'cliente.html';
+                    }
+                });
+            }
+        }
+        
+        return true;
+    }
+    return false;
+}
+
+// Função para redirecionar usuário logado que tenta acessar login.html
+function redirecionarSeLogado() {
+    var usuarioLogado = sessionStorage.getItem('usuarioLogado');
+    if (usuarioLogado) {
+        var usuario = JSON.parse(usuarioLogado);
+        console.log('Usuário já logado tentando acessar login, redirecionando...');
+        
+        if (usuario.tipoAcesso === 'admin') {
+            window.location.href = 'admin.html';
+        } else {
+            window.location.href = 'cliente.html';
+        }
+        return true;
+    }
+    return false;
+}
 
 // ===== FUNÇÕES DE PROTEÇÃO DE ACESSO =====
 
@@ -918,6 +977,19 @@ function verificarAutenticacao() {
         window.location.href = 'login.html';
         return false;
     }
+    
+    // Verificar se o usuário está na página correta
+    var usuario = JSON.parse(usuarioLogado);
+    var paginaAtual = window.location.pathname;
+    
+    if (paginaAtual.includes('cliente.html') && usuario.tipoAcesso === 'admin') {
+        window.location.href = 'admin.html';
+        return false;
+    } else if (paginaAtual.includes('admin.html') && usuario.tipoAcesso !== 'admin') {
+        window.location.href = 'cliente.html';
+        return false;
+    }
+    
     return true;
 }
 
@@ -935,7 +1007,7 @@ function verificarPermissoes(tipoPermitido) {
         if (usuario.tipoAcesso === 'admin') {
             window.location.href = 'admin.html';
         } else {
-            window.location.href = 'index.html';
+            window.location.href = 'cliente.html';
         }
         return false;
     }
