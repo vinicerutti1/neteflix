@@ -1,130 +1,160 @@
-// Arquivo de testes unitários usando QUnit
-// Este arquivo contém todos os testes para o projeto Neteflix
+// QUnit - Adicionando via CDN
+// Inclua o seguinte em um arquivo HTML de testes ou diretamente aqui para rodar no navegador:
+// <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.19.4.css">
+// <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
 
-QUnit.module('Testes Básicos do Projeto Neteflix');
+// Para rodar os testes, crie um arquivo tests.html com os links do QUnit e inclua este tests.js:
+//
+// <!DOCTYPE html>
+// <html lang="pt-br">
+// <head>
+//   <meta charset="UTF-8">
+//   <title>Testes QUnit</title>
+//   <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.19.4.css">
+// </head>
+// <body>
+//   <div id="qunit"></div>
+//   <div id="qunit-fixture"></div>
+//   <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
+//   <script src="tests.js"></script>
+// </body>
+// </html>
 
-QUnit.test('Verificar se QUnit está funcionando', function(assert) {
-    assert.ok(true, 'QUnit está funcionando corretamente');
-    assert.equal(1 + 1, 2, 'Operações matemáticas básicas funcionam');
-});
+// Mocks e helpers para testes
+function mockDb() {
+    return {
+        put: sinon.stub().resolves({ok: true, id: 'mock_id'}),
+        get: sinon.stub().resolves({
+            _id: 'mock_id',
+            titulo: 'Filme Teste',
+            categoria: 'acao',
+            sinopse: 'desc',
+            trailer: 'url',
+            imagem: 'img',
+            nome: 'Usuário Teste',
+            email: 'teste@teste.com',
+            senha: '123456',
+            tipoAcesso: 'admin',
+            _rev: '1-abc'
+        }),
+        remove: sinon.stub().resolves({ok: true}),
+        allDocs: sinon.stub().resolves({rows: []})
+    };
+}
 
-QUnit.test('Verificar se a página carregou corretamente', function(assert) {
-    assert.ok(document.querySelector('body'), 'Body da página existe');
-    assert.ok(document.querySelector('.navbar'), 'Navbar existe');
-    assert.ok(document.querySelector('.hero-banner'), 'Hero banner existe');
-    assert.ok(document.querySelector('footer'), 'Footer existe');
-});
+// ====== INÍCIO DOS TESTES ======
 
-QUnit.test('Verificar elementos de navegação', function(assert) {
-    const navbar = document.querySelector('.navbar');
-    const brand = navbar.querySelector('.navbar-brand');
-    const loginLink = navbar.querySelector('a[href="login.html"]');
-    
-    assert.ok(brand, 'Logo/marca da navbar existe');
-    assert.equal(brand.textContent, 'NETEFLIX', 'Texto da marca está correto');
-    assert.ok(loginLink, 'Link de login existe');
-    assert.equal(loginLink.textContent, 'Entrar', 'Texto do link de login está correto');
-});
+QUnit.module('Funções de Filmes', hooks => {
+    let oldDbFilmes, oldAlert, oldConfirm;
+    hooks.beforeEach(() => {
+        oldDbFilmes = window.dbFilmes;
+        dbFilmes = window.dbFilmes = mockDb();
+        oldAlert = window.alert;
+        window.alert = sinon.stub();
+        oldConfirm = window.confirm;
+        window.confirm = sinon.stub().returns(true);
+        // Mock DOM
+        document.getElementById('qunit-fixture').innerHTML = `
+            <form id="formFilme">
+                <input id="titulo"><input id="categoria"><input id="sinopse"><input id="trailer"><input id="imagem">
+                <button type="submit">Cadastrar Filme</button>
+            </form>
+            <div id="listaFilmes"></div>
+        `;
+    });
+    hooks.afterEach(() => {
+        dbFilmes = window.dbFilmes = oldDbFilmes;
+        window.alert = oldAlert;
+        window.confirm = oldConfirm;
+        document.getElementById('qunit-fixture').innerHTML = '';
+    });
 
-QUnit.test('Verificar conteúdo do hero banner', function(assert) {
-    const heroContent = document.querySelector('.hero-content');
-    const title = heroContent.querySelector('h1');
-    const subtitle = heroContent.querySelector('p');
-    const button = heroContent.querySelector('.btn');
-    
-    assert.ok(title, 'Título do hero banner existe');
-    assert.equal(title.textContent, 'Filmes, séries e muito mais', 'Título está correto');
-    assert.ok(subtitle, 'Subtítulo do hero banner existe');
-    assert.equal(subtitle.textContent, 'Feito com amor para o iskailer', 'Subtítulo está correto');
-    assert.ok(button, 'Botão do hero banner existe');
-    assert.equal(button.textContent, 'Começar', 'Texto do botão está correto');
-    assert.ok(button.classList.contains('btn-primary'), 'Botão tem a classe btn-primary');
-});
+    QUnit.test('cadastrarFilme cadastra corretamente', assert => {
+        const done = assert.async();
+        cadastrarFilme({titulo: 'Teste', categoria: 'acao', sinopse: 'desc', trailer: 'url', imagem: 'img'})
+            .then(result => {
+                assert.ok(window.dbFilmes.put.calledOnce, 'dbFilmes.put chamado');
+                assert.ok(window.alert.calledWithMatch('sucesso'), 'alerta de sucesso chamado');
+                done();
+            });
+    });
 
-QUnit.test('Verificar footer', function(assert) {
-    const footer = document.querySelector('footer');
-    const copyright = footer.querySelector('p');
-    
-    assert.ok(copyright, 'Copyright do footer existe');
-    assert.ok(copyright.textContent.includes('2024'), 'Copyright contém o ano 2024');
-    assert.ok(copyright.textContent.includes('Neteflix'), 'Copyright contém o nome Neteflix');
-});
+    QUnit.test('editarFilme preenche formulário com dados do filme', assert => {
+        const done = assert.async();
+        editarFilme('mock_id');
+        setTimeout(() => {
+            assert.equal(document.getElementById('titulo').value, 'Filme Teste', 'Título preenchido');
+            assert.equal(document.getElementById('categoria').value, 'acao', 'Categoria preenchida');
+            done();
+        }, 10);
+    });
 
-// Testes para verificar se os scripts externos carregaram
-QUnit.test('Verificar carregamento de dependências externas', function(assert) {
-    assert.ok(typeof $ !== 'undefined' || typeof jQuery !== 'undefined', 'jQuery está disponível (via Bootstrap)');
-    assert.ok(typeof PouchDB !== 'undefined', 'PouchDB está disponível');
-    assert.ok(typeof QUnit !== 'undefined', 'QUnit está disponível');
-});
-
-// Testes para verificar responsividade
-QUnit.test('Verificar classes de responsividade', function(assert) {
-    const navbar = document.querySelector('.navbar');
-    const heroBanner = document.querySelector('.hero-banner');
-    
-    assert.ok(navbar.classList.contains('navbar-expand-lg'), 'Navbar tem classe de expansão responsiva');
-    assert.ok(heroBanner.classList.contains('hero-banner'), 'Hero banner tem suas classes CSS');
-});
-
-// Testes para verificar estrutura HTML
-QUnit.test('Verificar estrutura HTML básica', function(assert) {
-    assert.ok(document.doctype, 'Documento tem DOCTYPE');
-    assert.equal(document.documentElement.lang, 'pt-br', 'Linguagem do documento está definida como pt-br');
-    assert.ok(document.title.includes('Neteflix'), 'Título da página contém Neteflix');
-});
-
-// Testes para verificar links e navegação
-QUnit.test('Verificar links de navegação', function(assert) {
-    const loginLinks = document.querySelectorAll('a[href="login.html"]');
-    assert.ok(loginLinks.length > 0, 'Existe pelo menos um link para login.html');
-    
-    loginLinks.forEach(function(link, index) {
-        assert.ok(link.href.includes('login.html'), `Link ${index + 1} aponta para login.html`);
+    QUnit.test('excluirFilme remove filme corretamente', assert => {
+        const done = assert.async();
+        excluirFilme('mock_id');
+        setTimeout(() => {
+            assert.ok(window.dbFilmes.get.calledOnce, 'dbFilmes.get chamado');
+            assert.ok(window.dbFilmes.remove.calledOnce, 'dbFilmes.remove chamado');
+            assert.ok(window.alert.calledWithMatch('excluído'), 'alerta de exclusão chamado');
+            done();
+        }, 10);
     });
 });
 
-// Testes para verificar estilos CSS
-QUnit.test('Verificar aplicação de estilos', function(assert) {
-    const body = document.querySelector('body');
-    const computedStyle = window.getComputedStyle(body);
-    
-    assert.ok(body.classList.contains('index-page'), 'Body tem a classe index-page');
-    assert.ok(computedStyle.backgroundImage.includes('background-index.jpg'), 'Background image está aplicado');
-});
-
-// Testes para verificar funcionalidades JavaScript
-QUnit.test('Verificar disponibilidade de funções JavaScript', function(assert) {
-    // Aqui você pode adicionar testes para funções específicas do seu scripts.js
-    // Por exemplo, se você tiver funções de autenticação, validação, etc.
-    assert.ok(true, 'Estrutura básica para testes de JavaScript está pronta');
-});
-
-// Testes para verificar acessibilidade básica
-QUnit.test('Verificar acessibilidade básica', function(assert) {
-    const images = document.querySelectorAll('img');
-    const buttons = document.querySelectorAll('button, .btn');
-    
-    // Verificar se imagens têm alt text (se houver imagens)
-    images.forEach(function(img, index) {
-        assert.ok(img.alt !== undefined, `Imagem ${index + 1} tem atributo alt`);
+QUnit.module('Funções de Usuários', hooks => {
+    let oldDbUsuarios, oldAlert, oldConfirm;
+    hooks.beforeEach(() => {
+        oldDbUsuarios = window.dbUsuarios;
+        dbUsuarios = window.dbUsuarios = mockDb();
+        oldAlert = window.alert;
+        window.alert = sinon.stub();
+        oldConfirm = window.confirm;
+        window.confirm = sinon.stub().returns(true);
+        // Mock DOM
+        document.getElementById('qunit-fixture').innerHTML = `
+            <form id="formUsuario">
+                <input id="nome"><input id="email"><input id="senha"><input id="tipoAcesso">
+                <button type="submit">Cadastrar Usuário</button>
+            </form>
+            <div id="listaUsuarios"></div>
+        `;
     });
-    
-    // Verificar se botões têm texto ou aria-label
-    buttons.forEach(function(button, index) {
-        const hasText = button.textContent.trim().length > 0;
-        const hasAriaLabel = button.getAttribute('aria-label') !== null;
-        assert.ok(hasText || hasAriaLabel, `Botão ${index + 1} tem texto ou aria-label`);
+    hooks.afterEach(() => {
+        dbUsuarios = window.dbUsuarios = oldDbUsuarios;
+        window.alert = oldAlert;
+        window.confirm = oldConfirm;
+        document.getElementById('qunit-fixture').innerHTML = '';
+    });
+
+    QUnit.test('cadastrarUsuario cadastra corretamente', assert => {
+        const done = assert.async();
+        cadastrarUsuario({nome: 'Teste', email: 'teste@teste.com', senha: '123456', tipoAcesso: 'admin'})
+            .then(result => {
+                assert.ok(window.dbUsuarios.put.calledOnce, 'dbUsuarios.put chamado');
+                assert.ok(window.alert.calledWithMatch('sucesso'), 'alerta de sucesso chamado');
+                done();
+            });
+    });
+
+    QUnit.test('editarUsuario preenche formulário com dados do usuário', assert => {
+        const done = assert.async();
+        editarUsuario('mock_id');
+        setTimeout(() => {
+            assert.equal(document.getElementById('nome').value, 'Usuário Teste', 'Nome preenchido');
+            assert.equal(document.getElementById('email').value, 'teste@teste.com', 'Email preenchido');
+            done();
+        }, 10);
+    });
+
+    QUnit.test('excluirUsuario remove usuário corretamente', assert => {
+        const done = assert.async();
+        excluirUsuario('mock_id');
+        setTimeout(() => {
+            assert.ok(window.dbUsuarios.get.calledOnce, 'dbUsuarios.get chamado');
+            assert.ok(window.dbUsuarios.remove.calledOnce, 'dbUsuarios.remove chamado');
+            assert.ok(window.alert.calledWithMatch('excluído'), 'alerta de exclusão chamado');
+            done();
+        }, 10);
     });
 });
-
-// Testes para verificar meta tags
-QUnit.test('Verificar meta tags importantes', function(assert) {
-    const charset = document.querySelector('meta[charset]');
-    const viewport = document.querySelector('meta[name="viewport"]');
     
-    assert.ok(charset, 'Meta tag charset existe');
-    assert.ok(viewport, 'Meta tag viewport existe');
-    assert.equal(charset.getAttribute('charset'), 'UTF-8', 'Charset está definido como UTF-8');
-});
-
-console.log('Arquivo de testes QUnit carregado com sucesso!'); 
